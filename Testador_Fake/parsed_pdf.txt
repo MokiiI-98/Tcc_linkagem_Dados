@@ -1,0 +1,120 @@
+CONCLUSÃO
+OBJETIVO
+RESULTADOS E DISCUSSÃO
+REFERÊNCIAS BIBLIOGRÁFICAS
+Este trabalho tem como objetivo analisar o nível de privacidade 
+dos dados abertos disponibilizados pelo Sistema de Informação 
+sobre Mortalidade (SIM) e pelo Sistema de Informações sobre 
+Nascidos Vivos (SINASC) [2][3], por meio da aplicação de 
+algoritmos de linkagem. A intenção é identificar vulnerabilidades e 
+propor 
+estratégias 
+mais 
+robustas 
+de 
+anonimização, 
+em 
+conformidade com as diretrizes da Lei Geral de Proteção de Dados 
+(LGPD) [4]. 
+A aplicação das técnicas de linkagem entre as bases do SIM e do 
+SINASC permitirá identificar eventos vitais relacionados, como 
+óbitos neonatais associados a nascimentos específicos, 
+viabilizando análises epidemiológicas mais completas. Espera-se 
+que este estudo evidencie o nível de exposição à reidentificação 
+presente nos dados abertos e contribua para o aprimoramento 
+de estratégias de anonimização, em conformidade com a LGPD, 
+promovendo um equilíbrio entre transparência pública e 
+proteção da privacidade. 
+1. VIDANAGE, Anushka et al. A taxonomy of attacks on 
+privacy-preserving record linkage. Journal of Privacy and 
+Confidentiality, v. 12, n. 1, 2022.
+2. BRASIL. Ministério da Saúde. Secretaria de Vigilância em 
+Saúde e Ambiente. Sistema de Informação sobre Mortalidade 
+(SIM). 
+Disponível 
+em: 
+https://svs.aids.gov.br/daent/centrais-de-conteudos/dados-a
+bertos/sim/. Acesso em: 5 maio de 2025.
+3. BRASIL. Ministério da Saúde. Secretaria de Vigilância em 
+Saúde e Ambiente.  Sistema de Informações sobre Nascidos 
+Vivos 
+(SINASC). 
+Disponível 
+em: 
+<https://svs.aids.gov.br/daent/centrais-de-conteudos/dados-
+abertos/sinasc/>. Acesso em: 05 de maio de 2025.
+4. BRASIL, Lei nº 13.709, de 14 de agosto de 2018. Diário Oficial 
+da União, Aug. 15, 2018. [Online]. Disponível em: 
+https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/l
+ei/l13709.htm
+Eixo temático: Privacidade em Dados Abertos de Saúde.
+Palavras-chaves: Privacidade de dados, Dados abertos em saúde, 
+Linkagem de dados, Anonimização, Epidemiologia.
+Análise da Privacidade em Dados Abertos de Análise 
+Epidemiológica e Vigilância de Doenças Não Transmissíveis
+ Luan da Silva Lima BARBOSA¹; Bruno Cavalcante Toledo ELIAS¹; Angelo Darcy Molin BRUN²; 
+Ekler Paulino de MATTOS². 
+¹Acadêmico do Curso de Graduação em Sistemas de Informação. Universidade Federal do Mato Grosso do Sul 
+²Professor do Curso de Graduação em Sistemas de Informação. Universidade Federal de Mato Grosso do Sul.
+{lima.luan, bruno.cavalcante, angelo.molin, ekler.mattos}@ufms..br
+O tratamento dos dados pessoais sensíveis será realizado com 
+responsabilidade, 
+utilizando 
+ambientes 
+controlados 
+e 
+apresentando os resultados de forma agregada, a fim de 
+garantir a privacidade dos indivíduos e assegurar que os dados 
+sejam utilizados exclusivamente para fins científicos e 
+estatísticos. 
+MÉTODOS
+Será realizada uma revisão de literatura sobre técnicas de 
+linkagem, abrangendo três abordagens principais: descritiva, 
+probabilística e baseada em aprendizado de máquina. Após essa 
+análise, serão selecionadas as técnicas mais adequadas para 
+aplicação sobre os registros do SIM e do SINASC.
+Os dados serão previamente tratados, eliminando registros com 
+campos essenciais ausentes ou inconsistentes. As variáveis 
+escolhidas como quasi-identificadores incluem: data e município 
+de nascimento, raça, sexo, endereço (logradouro, número, bairro, 
+município, UF, CEP), estado civil da mãe, duração da gestação, tipo 
+de gravidez e de parto.
+A métrica adotada para avaliar o desempenho será a taxa de 
+linkagem (TL), definida como a razão entre o número de registros 
+corretamente vinculados e o total de registros analisados. Para 
+validar os resultados, será solicitada à Secretaria de Estado da 
+Saúde de Mato Grosso do Sul (SES-MS) a disponibilização das 
+versões originais dos dados.
+Com base nas técnicas estudadas, espera-se alcançar uma taxa 
+de linkagem superior a 50% em pelo menos duas das 
+abordagens aplicadas, demonstrando a vulnerabilidade dos 
+dados anonimizados frente a métodos de reidentificação. 
+INTRODUÇÃO
+A análise de dados abertos da saúde é essencial por razões 
+estratégicas, 
+científicas 
+e 
+sociais, 
+contribuindo 
+para 
+o 
+aprimoramento do sistema de saúde. Informações oriundas da 
+vigilância 
+de 
+doenças 
+não 
+transmissíveis 
+e 
+da 
+análise 
+epidemiológica permitem identificar e monitorar tendências, 
+orientando políticas públicas e ações de prevenção. Além disso, 
+esses dados fomentam a inovaçã o por parte de pesquisadores, 
+universidades e startups, promovendo avanços em áreas como 
+epidemiologia, inteligência artificial na saúde e medicina preditiva.
+Apesar de sua relevância, dados abertos podem conter 
+quasi-identificadores, que representam riscos à privacidade 
+mesmo após processos de anonimização. Técnicas de linkagem 
+possibilitam reidentificar registros, permitindo inferir informações 
+como localização, classe social, escolaridade, causas de óbito e até 
+a identidade dos indivíduos [1].
