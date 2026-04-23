@@ -7,15 +7,15 @@ from classificadores.Classificador_Probabilistico import ClassificadorProbabilis
 from classificadores.Classificador_Descritivo import ClassificadorDescritivo
 import os
 import sys
-sys.stdout = open('safe_output.txt', 'w', encoding='utf-8')
+# sys.stdout = open('safe_output.txt', 'w', encoding='utf-8')
 
 print("\n" + "="*50)
 print(" INICIANDO TESTE COM DADOS MOCKADOS")
 print("="*50)
 
-df_a = pd.read_csv("sinasc_100.csv", sep=";", encoding="utf-8", dtype=str)
-df_b = pd.read_csv("sim_100.csv", sep=";", encoding="utf-8", dtype=str)
-true_matches = pd.read_csv("matches_100.csv", sep=";", encoding="utf-8", dtype=str)
+df_a = pd.read_csv("sinasc_800.csv", sep=";", encoding="utf-8", dtype=str)
+df_b = pd.read_csv("sim_800.csv", sep=";", encoding="utf-8", dtype=str)
+true_matches = pd.read_csv("matches_800.csv", sep=";", encoding="utf-8", dtype=str)
 
 print("\n" + "="*50)
 print(" RANDOM FOREST (SUPERVISIONADO)")

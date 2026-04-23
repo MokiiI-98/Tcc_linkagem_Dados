@@ -18,17 +18,17 @@ class ClassificadorDescritivo:
         indexer = recordlinkage.Index()
         pares_encontrados = set()
 
-        # Regra 1: Passos muito rígidos (Município de Residência + Sexo + Data de Nascimento Exata)
-        regra_1 = [c for c in ["codmunres", "CODMUNRES", "sexo", "SEXO", "dtnasc", "DTNASC"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_1:
+        # Regra 1: Passos muito rígidos (Nome + Município de Residência + Sexo + Data de Nascimento Exata)
+        regra_1 = [c for c in ["nome", "NOME", "codmunres", "CODMUNRES", "sexo", "SEXO", "dtnasc", "DTNASC"] if c in self.df_a.columns and c in self.df_b.columns]
+        if any("nome" in c.lower() for c in regra_1) and len(regra_1) >= 4:
             indexer.block(regra_1)
             links_r1 = set(indexer.index(self.df_a, self.df_b))
             pares_encontrados.update(links_r1)
             
-        # Regra 2: Código do Município de Nascimento + Sexo + CEP
+        # Regra 2: (Nome da Mãe + Município de Nascimento + Sexo + CEP)
         indexer_2 = recordlinkage.Index()
-        regra_2 = [c for c in ["codmunnasc", "CODMUNNASC", "sexo", "SEXO", "cep", "CEP"] if c in self.df_a.columns and c in self.df_b.columns]
-        if len(regra_2) >= 3:
+        regra_2 = [c for c in ["nomemae", "NOMEMAE", "codmunnasc", "CODMUNNASC", "sexo", "SEXO", "cep", "CEP"] if c in self.df_a.columns and c in self.df_b.columns]
+        if any("nomemae" in c.lower() for c in regra_2) and len(regra_2) >= 3:
             indexer_2.block(regra_2)
             links_r2 = set(indexer_2.index(self.df_a, self.df_b))
             pares_encontrados.update(links_r2)
@@ -48,6 +48,14 @@ class ClassificadorDescritivo:
             indexer_4.block(regra_4)
             links_r4 = set(indexer_4.index(self.df_a, self.df_b))
             pares_encontrados.update(links_r4)
+            
+        # Regra 5: Nome Exato + Sexo (ignora o resto) - Regra mais relaxada para garantir recall 
+        indexer_5 = recordlinkage.Index()
+        regra_5 = [c for c in ["nome", "NOME", "sexo", "SEXO"] if c in self.df_a.columns and c in self.df_b.columns]
+        if len(regra_5) >= 2:
+            indexer_5.block(regra_5)
+            links_r5 = set(indexer_5.index(self.df_a, self.df_b))
+            pares_encontrados.update(links_r5)
 
         predict_matches = pd.MultiIndex.from_tuples(list(pares_encontrados), names=["sinasc_index", "sim_index"])
 
@@ -75,6 +83,10 @@ class ClassificadorDescritivo:
             print(f"Revocação (Recall): {recall:.2%}")
             print(f"F1-Score: {f1:.2%}")
             print(f"Taxa de Reidentificação: {taxa_reid:.2%} ({tp}/{total_amostras})")
+            
+            # Para descritivo, o MRR é a própria proporção de pares corretos encontrados, já que não há ranking (tudo é rank 1).
+            mrr = tp / len(self.true_matches) if len(self.true_matches) > 0 else 0
+            print(f"MRR (Mean Reciprocal Rank): {mrr:.4f}")
 
         return predict_matches
 

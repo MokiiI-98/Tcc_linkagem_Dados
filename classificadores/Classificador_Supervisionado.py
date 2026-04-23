@@ -21,8 +21,11 @@ class ClassificadorSupervisionado:
         self.df_a["id_sinasc"] = self.df_a.index
         self.df_b["id_sim"] = self.df_b.index
 
-        # Converte os true_matches em MultiIndex
-        self.true_matches = pd.MultiIndex.from_frame(true_matches)
+        # Converte os true_matches em MultiIndex se for dataframe
+        if isinstance(true_matches, pd.DataFrame):
+            self.true_matches = pd.MultiIndex.from_frame(true_matches)
+        else:
+            self.true_matches = true_matches
 
     def indexar(self):
         """Faz o bloqueio (reduz combinações) usando múltiplos blocos para melhorar o recall."""
@@ -32,19 +35,19 @@ class ClassificadorSupervisionado:
 
         # Regra 1: Município de residência e Sexo/Ano
         regra_1 = [c for c in ["codmunres", "CODMUNRES", "sexo", "SEXO", "ano", "ANO"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_1:
+        if len(regra_1) >= 2:
             indexer.block(regra_1)
             blocos_aplicados += 1
 
         # Regra 2: Data de nascimento
         regra_2 = [c for c in ["dtnasc", "DTNASC"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_2:
+        if len(regra_2) >= 1:
             indexer.block(regra_2)
             blocos_aplicados += 1
 
         # Regra 2.5: Municipio de Nascimento e Sexo
         regra_3 = [c for c in ["codmunnasc", "CODMUNNASC", "sexo", "SEXO", "ano", "ANO"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_3:
+        if len(regra_3) >= 2:
             indexer.block(regra_3)
             blocos_aplicados += 1
 
@@ -54,10 +57,17 @@ class ClassificadorSupervisionado:
         if col_cep_a and col_cep_b:
             indexer.sortedneighbourhood(left_on=col_cep_a, right_on=col_cep_b, window=5)
             blocos_aplicados += 1
+            
+        # Regra Extra: NOME com sorted neighbourhood
+        col_nome_a = next((c for c in ["nome", "NOME"] if c in self.df_a.columns), None)
+        col_nome_b = next((c for c in ["nome", "NOME"] if c in self.df_b.columns), None)
+        if col_nome_a and col_nome_b:
+            indexer.sortedneighbourhood(left_on=col_nome_a, right_on=col_nome_b, window=3)
+            blocos_aplicados += 1
 
         # Regra 4: Nome da mãe e Sexo (Ortogonal a dtnasc/município)
         regra_4 = [c for c in ["nomemae", "NOMEMAE", "sexo", "SEXO"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_4:
+        if len(regra_4) >= 2:
             indexer.block(regra_4)
             blocos_aplicados += 1
 
@@ -75,7 +85,6 @@ class ClassificadorSupervisionado:
         return candidate_links
 
     def treinar_e_avaliar(self):
-        """Treina um classificador supervisionado agressivo para True Positives"""
         # Gera os pares candidatos
         candidate_links = self.indexar()
 
@@ -86,10 +95,9 @@ class ClassificadorSupervisionado:
         colunas_string = ["nome", "NOME", "nomemae", "NOMEMAE", "logradouro", "LOGRADOURO", "bairro", "BAIRRO", "dtnasc", "DTNASC"]
         for col in colunas_string:
             if col in self.df_a.columns and col in self.df_b.columns:
-                # Usar Jaro-Winkler ajuda muito a encontrar matches onde a data de nascimento tem 1 dígito errado (ex: 01012024 vs 01102024)
+
                 compare.string(col, col, method="jarowinkler", label=f"{col}_str")
-                
-                # Para nomes, usa qgram também para capturar palavras invertidas (tokens)
+
                 if ("NOME" in col.upper() or "LOGRADOURO" in col.upper()):
                     compare.string(col, col, method="qgram", label=f"{col}_qgram")
 
@@ -151,5 +159,29 @@ class ClassificadorSupervisionado:
         
         print("\n📊 Relatório de classificação (Otimizado para MAIOR Precisão + Recall):")
         print(classification_report(y_test, y_pred))
+
+        # Cálculo de MRR para a base completa de candidatos
+        probabilidades_full = clf.predict_proba(features)[:, 1]
+        df_scores = pd.DataFrame({
+            'score': probabilidades_full
+        }, index=features.index).reset_index()
+        
+        # Pega as colunas certas do MultiIndex
+        df_scores.columns = ['sinasc_index', 'sim_index', 'score']
+        df_scores = df_scores.sort_values(by=['sinasc_index', 'score'], ascending=[True, False])
+        df_scores['rank'] = df_scores.groupby('sinasc_index').cumcount() + 1
+        
+        true_df = self.true_matches.to_frame(index=False)
+        if not true_df.empty:
+            true_df.columns = ['sinasc_index', 'sim_index']
+            merged = pd.merge(df_scores, true_df, on=['sinasc_index', 'sim_index'], how='inner')
+            if not merged.empty:
+                mrr = (1.0 / merged['rank']).sum() / len(true_df)
+            else:
+                mrr = 0.0
+        else:
+            mrr = 0.0
+            
+        print(f"MRR (Mean Reciprocal Rank): {mrr:.4f}")
 
         return clf

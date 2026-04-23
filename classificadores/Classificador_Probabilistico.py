@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import recordlinkage
 
 class ClassificadorProbabilistico:
@@ -24,19 +25,19 @@ class ClassificadorProbabilistico:
 
         # Regra 1: Município de residência e Sexo/Ano
         regra_1 = [c for c in ["codmunres", "CODMUNRES", "sexo", "SEXO", "ano", "ANO"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_1:
+        if len(regra_1) >= 2:
             indexer.block(regra_1)
             blocos_aplicados += 1
 
         # Regra 2: Data de nascimento
         regra_2 = [c for c in ["dtnasc", "DTNASC"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_2:
+        if len(regra_2) >= 1:
             indexer.block(regra_2)
             blocos_aplicados += 1
 
         # Regra 2.5: Municipio de Nascimento e Sexo
         regra_3 = [c for c in ["codmunnasc", "CODMUNNASC", "sexo", "SEXO", "ano", "ANO"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_3:
+        if len(regra_3) >= 2:
             indexer.block(regra_3)
             blocos_aplicados += 1
 
@@ -46,10 +47,17 @@ class ClassificadorProbabilistico:
         if col_cep_a and col_cep_b:
             indexer.sortedneighbourhood(left_on=col_cep_a, right_on=col_cep_b, window=5)
             blocos_aplicados += 1
+            
+        # Regra Extra: NOME com sorted neighbourhood
+        col_nome_a = next((c for c in ["nome", "NOME"] if c in self.df_a.columns), None)
+        col_nome_b = next((c for c in ["nome", "NOME"] if c in self.df_b.columns), None)
+        if col_nome_a and col_nome_b:
+            indexer.sortedneighbourhood(left_on=col_nome_a, right_on=col_nome_b, window=3)
+            blocos_aplicados += 1
 
         # Regra 4: Nome da mãe e Sexo (Ortogonal a dtnasc/município)
         regra_4 = [c for c in ["nomemae", "NOMEMAE", "sexo", "SEXO"] if c in self.df_a.columns and c in self.df_b.columns]
-        if regra_4:
+        if len(regra_4) >= 2:
             indexer.block(regra_4)
             blocos_aplicados += 1
 
@@ -74,11 +82,12 @@ class ClassificadorProbabilistico:
         colunas_string = ["nome", "NOME", "nomemae", "NOMEMAE", "logradouro", "LOGRADOURO", "bairro", "BAIRRO", "dtnasc", "DTNASC"]
         for col in colunas_string:
             if col in self.df_a.columns and col in self.df_b.columns:
-                compare.string(col, col, method="jarowinkler", threshold=0.85, label=f"{col}_str")
+                compare.string(col, col, method="jarowinkler", label=f"{col}_str")
                 if ("NOME" in col.upper() or "LOGRADOURO" in col.upper()):
-                    compare.string(col, col, method="qgram", threshold=0.75, missing_value=0.3, label=f"{col}_qgram")
+                    compare.string(col, col, method="qgram", missing_value=0.3, label=f"{col}_qgram")
 
         colunas_exatas = [
+            "nome", "NOME", "nomemae", "NOMEMAE", # Adicionado para penalizar clones falsos no score final
             "sexo", "SEXO", "ano", "ANO", "codmunres", "CODMUNRES",
             "dtnasc", "DTNASC", "codmunnasc", "CODMUNNASC",
             "racacor", "RACACOR", "numero", "NUMERO",
@@ -95,10 +104,12 @@ class ClassificadorProbabilistico:
 
         # Definir Pesos Probabilísticos empíricos
         pesos_configurados = {
-            "NOME_str": 2.5, "nome_str": 2.5,
-            "NOME_qgram": 1.5, "nome_qgram": 1.5,
-            "NOMEMAE_str": 2.0, "nomemae_str": 2.0,
-            "NOMEMAE_qgram": 1.5, "nomemae_qgram": 1.5,
+            "NOME": 4.0, "nome": 4.0,           # Exato vale muito
+            "NOMEMAE": 3.0, "nomemae": 3.0,     # Exato vale muito
+            "NOME_str": 1.5, "nome_str": 1.5,   # Similaridade vale menos
+            "NOME_qgram": 1.0, "nome_qgram": 1.0,
+            "NOMEMAE_str": 1.5, "nomemae_str": 1.5,
+            "NOMEMAE_qgram": 1.0, "nomemae_qgram": 1.0,
             "DTNASC": 1.5, "dtnasc": 1.5,
             "DTNASC_str": 1.5, "dtnasc_str": 1.5,
             "CEP": 0.8, "cep": 0.8,
@@ -119,23 +130,23 @@ class ClassificadorProbabilistico:
         score_sum = weighted_scores.sum(axis=1)
 
         # Encontrar optimal threshold se tivermos true_matches disponiveis na interseccao
-        best_threshold = 4.2
+        best_threshold = 7.0
         if hasattr(self.true_matches, "intersection"):
-            best_f2 = 0
-            for th in [3.0, 3.5, 4.0, 4.2, 4.5, 5.0, 5.5, 6.0, 7.0]:
+            best_f1 = 0
+            for th in np.arange(5.0, 25.0, 0.5):
                 pred = score_sum[score_sum >= th].index
                 correct = len(self.true_matches.intersection(pred))
                 precision = correct / len(pred) if len(pred) > 0 else 0
                 recall = correct / len(self.true_matches) if len(self.true_matches) > 0 else 0
                 
-                # F2-Score otimiza dando prioridade para o Recall em vez de Precision (reduz Falsos Negativos)
-                f2_val = ((1 + 2**2) * precision * recall) / ((2**2 * precision) + recall) if precision + recall > 0 else 0
+                # F1-Score otimiza dando peso igual para Precisão e Recall
+                f1_val = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
                 
-                if f2_val > best_f2:
-                    best_f2 = f2_val
+                if f1_val > best_f1:
+                    best_f1 = f1_val
                     best_threshold = th
 
-            print(f"[INFO] Threshold probabilistico otimizado via grid search (F2-Score): {best_threshold}")
+            print(f"[INFO] Threshold probabilistico otimizado via grid search (F1-Score): {best_threshold}")
         
         predict_matches = score_sum[score_sum >= best_threshold].index
 
@@ -164,5 +175,24 @@ class ClassificadorProbabilistico:
             print(f"Revocação (Recall): {recall:.2%}")
             print(f"F1-Score: {f1:.2%}")
             print(f"Taxa de Reidentificação: {taxa_reid:.2%} ({tp}/{total_amostras})")
+
+            # Cálculo de MRR
+            df_scores = score_sum.reset_index()
+            df_scores.columns = ['sinasc_index', 'sim_index', 'score']
+            df_scores = df_scores.sort_values(by=['sinasc_index', 'score'], ascending=[True, False])
+            df_scores['rank'] = df_scores.groupby('sinasc_index').cumcount() + 1
+            
+            true_df = self.true_matches.to_frame(index=False)
+            if not true_df.empty:
+                true_df.columns = ['sinasc_index', 'sim_index']
+                merged = pd.merge(df_scores, true_df, on=['sinasc_index', 'sim_index'], how='inner')
+                if not merged.empty:
+                    mrr = (1.0 / merged['rank']).sum() / len(true_df)
+                else:
+                    mrr = 0.0
+            else: 
+                mrr = 0.0
+                
+            print(f"MRR (Mean Reciprocal Rank): {mrr:.4f}")
 
         return predict_matches, score_sum
