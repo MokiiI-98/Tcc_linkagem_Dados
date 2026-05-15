@@ -1,0 +1,119 @@
+
+==================================================
+ INICIANDO TESTE COM DADOS MOCKADOS
+==================================================
+
+==================================================
+ RANDOM FOREST (SUPERVISIONADO)
+==================================================
+DEBUG true_matches: MultiIndex([(0, 0),
+            (1, 1),
+            (2, 2),
+            (3, 3),
+            (4, 4)],
+           names=['sinasc_index', 'sim_index'])
+
+==================================================
+ VERIFICAÇÃO DE INTEGRIDADE DO GABARITO (AMOSTRA)
+==================================================
+🔹 Par de Match (SINASC: 0 <-> SIM: 0)
+   [SINASC] NOME: Maria Pereira Santos 0    | MÃE: Maria Souza Pereira 0
+   [SIM]    NOME: Maria Pereira 0           | MÃE: Siuza Maria Pereira 0
+--------------------------------------------------
+🔹 Par de Match (SINASC: 1 <-> SIM: 1)
+   [SINASC] NOME: Jose Lima Santos 0        | MÃE: Joao Lima Gomes 0
+   [SIM]    NOME: nan                       | MÃE: Lima Joao 0
+--------------------------------------------------
+🔹 Par de Match (SINASC: 2 <-> SIM: 2)
+   [SINASC] NOME: Lucas Oliveira Gomes 0    | MÃE: Pedro Gomes Souza 0
+   [SIM]    NOME: Lucas 0                   | MÃE: Pedro Gymes Souza 0
+--------------------------------------------------
+🔹 Par de Match (SINASC: 3 <-> SIM: 3)
+   [SINASC] NOME: Joao Gomes Alves 0        | MÃE: Marcos Alves Souza 0
+   [SIM]    NOME: Joao Gomes 0              | MÃE: Marcos Alves Souza 0
+--------------------------------------------------
+🔹 Par de Match (SINASC: 4 <-> SIM: 4)
+   [SINASC] NOME: Paulo Pereira Alvls 0     | MÃE: Pdero Lima Gomes 0
+   [SIM]    NOME: Paulo Pereira 0           | MÃE: Lima Pegro Gomjs 0
+--------------------------------------------------
+[INFO] 5 regras de bloqueio aplicadas.
+DEBUG features.index: MultiIndex([(0,   0),
+            (0,  82),
+            (0, 100),
+            (0, 182),
+            (0, 200)],
+           )
+✅ True matches disponíveis no treino: 788
+
+📊 Relatório de classificação (Otimizado para MAIOR Precisão + Recall):
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00      1183
+           1       1.00      0.99      0.99       236
+
+    accuracy                           1.00      1419
+   macro avg       1.00      0.99      0.99      1419
+weighted avg       1.00      1.00      1.00      1419
+
+MRR (Mean Reciprocal Rank): 0.9839
+
+==================================================
+ PROBABILÍSTICO (PESOS MATEMÁTICOS)
+==================================================
+[INFO] 5 regras de bloqueio aplicadas no Probabilístico.
+[INFO] Pares candidatos gerados: 13,698
+[INFO] Threshold probabilístico ótimo (F1=0.7747): 10.25
+
+📊 Resultados do Classificador PROBABILÍSTICO:
+  Total de pares preditos como MATCH : 729
+  True Positives                     : 502
+  Falsos Positivos                   : 227
+  Falsos Negativos                   : 58
+--------------------------------------------------
+  Precisão  (Precision)              : 68.86%
+  Revocação (Recall)                 : 89.64%
+  F1-Score                           : 77.89%
+  Taxa de Reidentificação            : 62.75% (502/800)
+  MRR (Mean Reciprocal Rank)         : 0.9433
+
+[CASCATA] Registros NÃO linkados pelo Probabilístico:
+  SINASC restantes : 71
+  SIM restantes    : 71
+
+📊 Avaliação no conjunto de TESTE (holdout 30%):
+
+📊 Resultados do Classificador PROBABILÍSTICO:
+  Total de pares preditos como MATCH : 227
+  True Positives                     : 227
+  Falsos Positivos                   : 0
+  Falsos Negativos                   : 13
+--------------------------------------------------
+  Precisão  (Precision)              : 100.00%
+  Revocação (Recall)                 : 94.58%
+  F1-Score                           : 97.22%
+  Taxa de Reidentificação            : 28.38% (227/800)
+  MRR (Mean Reciprocal Rank)         : 0.9804
+
+==================================================
+ DESCRITIVO (DETERMINÍSTICO - REGRAS DE BANCO)
+==================================================
+
+📊 Resultados do Classificador DESCRITIVO (Determinístico):
+  Total de pares preditos como MATCH : 614
+  True Positives                     : 610
+  Falsos Positivos                   : 4
+  Falsos Negativos                   : 190
+--------------------------------------------------
+  Precisão  (Precision)              : 99.35%
+  Revocação (Recall)                 : 76.25%
+  F1-Score                           : 86.28%
+  Taxa de Reidentificação            : 76.25% (610/800)
+  MRR (= Recall no determinístico)   : 0.7625
+
+[CASCATA] Registros NÃO linkados pelo Descritivo:
+  SINASC restantes : 186
+  SIM restantes    : 186
+  → Passar esses para o Random Forest
+
+
+✅ Todos os 3 pipelines mockados foram executados com sucesso!

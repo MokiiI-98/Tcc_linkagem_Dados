@@ -20,6 +20,12 @@ for i in range(8):
     if 'NOME' in temp_sim.columns: temp_sim['NOME'] = temp_sim['NOME'] + " " + str(i)
     if 'NOMEMAE' in temp_sim.columns: temp_sim['NOMEMAE'] = temp_sim['NOMEMAE'] + " " + str(i)
     
+    # OPÇÃO A: Garantir que a combinação de dados seja única alterando o ano de nascimento
+    if 'DTNASC' in temp_sinasc.columns:
+        temp_sinasc['DTNASC'] = temp_sinasc['DTNASC'].apply(lambda x: str(x)[:-1] + str(i) if pd.notna(x) and len(str(x)) >= 4 else x)
+    if 'DTNASC' in temp_sim.columns:
+        temp_sim['DTNASC'] = temp_sim['DTNASC'].apply(lambda x: str(x)[:-1] + str(i) if pd.notna(x) and len(str(x)) >= 4 else x)
+    
     df_sinasc_800_list.append(temp_sinasc)
     df_sim_800_list.append(temp_sim)
 
