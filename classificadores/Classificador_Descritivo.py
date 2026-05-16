@@ -98,11 +98,6 @@ class ClassificadorDescritivo:
             ["nomemae", "sexo"]
         ))
 
-        # NOTA: Regra 5 original (nome+sexo) foi REMOVIDA.
-        # Era muito permissiva e gerava muitos falsos positivos,
-        # prejudicando a precisão. Casos que dependeriam dela serão
-        # tratados pelo Random Forest com pesos.
-
         # ------------------------------------------------------------------
         # Deduplicação 1-para-1
         # Cada id_sinasc só pode linkar com 1 id_sim (o primeiro encontrado,
