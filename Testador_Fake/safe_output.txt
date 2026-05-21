@@ -10,77 +10,173 @@ Gabarito: 800 pares verdadeiros
 ============================================================
 
 📊 Resultados do Classificador DESCRITIVO (Determinístico):
-  Total de pares preditos como MATCH : 757
-  True Positives                     : 752
-  Falsos Positivos                   : 5
-  Falsos Negativos                   : 48
+  Total de pares preditos como MATCH : 769
+  True Positives                     : 769
+  Falsos Positivos                   : 0
+  Falsos Negativos                   : 31
 --------------------------------------------------
-  Precisão  (Precision)              : 99.34%
-  Revocação (Recall)                 : 94.00%
-  F1-Score                           : 96.60%
-  Taxa de Reidentificação            : 94.00% (752/800)
-  MRR (= Recall no determinístico)   : 0.9400
+  Precisão  (Precision)              : 100.00%
+  Revocação (Recall)                 : 96.12%
+  F1-Score                           : 98.02%
+  Taxa de Reidentificação            : 96.12% (769/800)
+  MRR (= Recall no determinístico)   : 0.9613
 
 [CASCATA] Registros NÃO linkados pelo Descritivo:
-  SINASC restantes : 43
-  SIM restantes    : 43
+  SINASC restantes : 31
+  SIM restantes    : 31
   → Passar esses para o Random Forest
 
+[EXPORT] Descritivo: 769 pares exportados (TP=769, FP=0) → Dados_fake\Pares_Reidentificados\pares_reidentificados_descritivo.csv
 
 ============================================================
  ESTÁGIO 2 — PROBABILÍSTICO (PESOS EMPÍRICOS)
 ============================================================
 Gabarito treino : 560 pares  (calibração do threshold)
 Gabarito teste  : 240 pares  (avaliação honesta)
-[INFO] 5 regras de bloqueio aplicadas no Probabilístico.
-[INFO] Pares candidatos gerados: 13,619
-[INFO] Threshold probabilístico ótimo (F1=0.7762): 10.25
+[INFO] 6 regras de bloqueio aplicadas no Probabilístico.
+[INFO] Pares candidatos gerados: 315,568
+[INFO] Threshold probabilístico ótimo (F1=0.8134): 10.75
 
 📊 Resultados do Classificador PROBABILÍSTICO:
-  Total de pares preditos como MATCH : 729
-  True Positives                     : 503
-  Falsos Positivos                   : 226
-  Falsos Negativos                   : 57
+  Total de pares preditos como MATCH : 756
+  True Positives                     : 528
+  Falsos Positivos                   : 228
+  Falsos Negativos                   : 32
 --------------------------------------------------
-  Precisão  (Precision)              : 69.00%
-  Revocação (Recall)                 : 89.82%
-  F1-Score                           : 78.04%
-  Taxa de Reidentificação            : 62.88% (503/800)
-  MRR (Mean Reciprocal Rank)         : 0.9482
+  Precisão  (Precision)              : 69.84%
+  Revocação (Recall)                 : 94.29%
+  F1-Score                           : 80.24%
+  Taxa de Reidentificação            : 66.00% (528/800)
+  MRR (Mean Reciprocal Rank)         : 0.9759
 
 [CASCATA] Registros NÃO linkados pelo Probabilístico:
-  SINASC restantes : 71
-  SIM restantes    : 71
+  SINASC restantes : 44
+  SIM restantes    : 44
 
 --- Avaliação no conjunto de TESTE (holdout 30%) ---
 
 📊 Avaliação no conjunto de TESTE (holdout 30%):
 
 📊 Resultados do Classificador PROBABILÍSTICO:
-  Total de pares preditos como MATCH : 226
-  True Positives                     : 226
+  Total de pares preditos como MATCH : 228
+  True Positives                     : 228
   Falsos Positivos                   : 0
-  Falsos Negativos                   : 14
+  Falsos Negativos                   : 12
 --------------------------------------------------
   Precisão  (Precision)              : 100.00%
-  Revocação (Recall)                 : 94.17%
-  F1-Score                           : 97.00%
-  Taxa de Reidentificação            : 28.25% (226/800)
-  MRR (Mean Reciprocal Rank)         : 0.9720
+  Revocação (Recall)                 : 95.00%
+  F1-Score                           : 97.44%
+  Taxa de Reidentificação            : 28.50% (228/800)
+  MRR (Mean Reciprocal Rank)         : 0.9849
+[EXPORT] Probabilístico: 756 pares exportados (TP=756, FP=0) → Dados_fake\Pares_Reidentificados\pares_reidentificados_probabilistico.csv
 
 ============================================================
- RESUMO DA CASCATA — DESCRITIVO + PROBABILÍSTICO
+ ESTÁGIO 3 — RANDOM FOREST (CLASSIFICADOR SUPERVISIONADO)
+============================================================
+[RF] Registros recebidos — SINASC: 44 | SIM: 44
+[RF] Pares verdadeiros neste estágio: 44
+[RF] 6 regras de bloqueio aplicadas.
+[RF] Pares candidatos gerados: 782
+[RF] True matches no espaço de candidatos: 42/44
+[RF] Threshold ótimo (F1=1.0000): 0.30
+
+📊 Relatório de classificação — conjunto de teste interno (RF):
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00       150
+           1       1.00      1.00      1.00        13
+
+    accuracy                           1.00       163
+   macro avg       1.00      1.00      1.00       163
+weighted avg       1.00      1.00      1.00       163
+
+
+📊 Resultados do Classificador RANDOM FOREST (estágio residual):
+  Total de pares preditos como MATCH : 36
+  True Positives                     : 36
+  Falsos Positivos                   : 0
+  Falsos Negativos                   : 8
+--------------------------------------------------
+  Precisão  (Precision)              : 100.00%
+  Revocação (Recall)                 : 81.82%
+  F1-Score                           : 90.00%
+  Taxa de Reidentificação (estágio)  : 81.82% (36/44)
+  MRR (Mean Reciprocal Rank)         : 0.9545
+
+[CASCATA] Registros NÃO linkados pelo RF:
+  SINASC residuais : 8
+  SIM residuais    : 8
+[EXPORT] Random Forest: 36 pares exportados (TP=36, FP=0) → Dados_fake\Pares_Reidentificados\pares_reidentificados_rf.csv
+
+============================================================
+ RESUMO DA CASCATA — DESCRITIVO + PROBABILÍSTICO + RANDOM FOREST
 ============================================================
 
   Estágio                 Matches     TP     FP   Não-link %
   ----------------------------------------------------------
-  Descritivo                  757    752      5        5.4%
-  Probabilístico              729    226    503        8.9%
+  Descritivo                  769    769      0        3.9%
+  Probabilístico              756    756      0        5.5%
+  Random Forest (Acumulado)      792    792      0        1.0%
 
-  Taxa de reidentificação — Descritivo     : 94.00%  (752/800)
-  Taxa de reidentificação — Probabilístico : 94.17%  (sobre holdout 30%)
+  Taxa de reidentificação — Descritivo     : 96.12%  (769/800)
+  Taxa de reidentificação — Probabilístico : 94.50%  (756/800)
+  Taxa de reidentificação — Random Forest  : 99.00%  (792/800)
 
-  Threshold probabilístico usado : 10.25
-  Registros ainda sem link       : 71 (8.9%)  → candidatos ao RF
+  Threshold probabilístico usado : 15.78
+  Registros ainda sem link       : 8 (1.0%)
+
+============================================================
+ EXPORTANDO CONSOLIDADO — TODOS OS PARES REIDENTIFICADOS
+============================================================
+[EXPORT] Consolidado: 1561 pares (TP=1561, FP=0) → Dados_fake\Pares_Reidentificados\pares_reidentificados_TODOS.csv
+
+============================================================
+ CONTAGEM DE REIDENTIFICAÇÃO POR ESTÁGIO (ÚNICOS)
+============================================================
+ ESTÁGIO 1 — DESCRITIVO (DETERMINÍSTICO):
+   SINASC:
+     • Reidentificados : 769 de 800 no gabarito (96.1%)
+     • Na base completa: 769 de 800 registros (96.1%)
+   SIM:
+     • Reidentificados : 769 de 800 no gabarito (96.1%)
+     • Na base completa: 769 de 800 registros (96.1%)
+
+ ESTÁGIO 2 — PROBABILÍSTICO (PESOS EMPÍRICOS):
+   [Conjunto de Teste/Avaliação (Holdout 30%)]
+     SINASC:
+       • Reidentificados : 228 de 240 no gabarito de teste (95.0%)
+     SIM:
+       • Reidentificados : 228 de 240 no gabarito de teste (95.0%)
+   [Geral / Base Completa (100%)]
+     SINASC:
+       • Reidentificados : 756 de 800 no gabarito total (94.5%)
+       • Na base completa: 756 de 800 (94.5%)
+     SIM:
+       • Reidentificados : 756 de 800 no gabarito total (94.5%)
+       • Na base completa: 756 de 800 (94.5%)
+
+ ESTÁGIO 3 — RANDOM FOREST (CLASSIFICADOR SUPERVISIONADO - ACUMULADO):
+   SINASC:
+     • Reidentificados : 792 de 800 no gabarito (99.0%)
+     • Na base completa: 792 de 800 registros (99.0%)
+   SIM:
+     • Reidentificados : 792 de 800 no gabarito (99.0%)
+     • Na base completa: 792 de 800 registros (99.0%)
+
+ TOTAL CONSOLIDADO (DESCRITIVO + PROBABILÍSTICO + RANDOM FOREST):
+   SINASC:
+     • Reidentificados : 793 de 800 no gabarito (99.1%)
+     • Na base completa: 793 de 800 (99.1%)
+   SIM:
+     • Reidentificados : 793 de 800 no gabarito (99.1%)
+     • Na base completa: 793 de 800 (99.1%)
+============================================================
+
 
 ✅ Execução concluída com sucesso!
+📁 Arquivos gerados:
+   • safe_output.txt                        — log completo da execução
+   • Dados_fake/Pares_Reidentificados/pares_reidentificados_descritivo.csv   — pares do Estágio 1
+   • Dados_fake/Pares_Reidentificados/pares_reidentificados_probabilistico.csv — pares do Estágio 2
+   • Dados_fake/Pares_Reidentificados/pares_reidentificados_rf.csv           — pares do Estágio 3
+   • Dados_fake/Pares_Reidentificados/pares_reidentificados_TODOS.csv        — consolidado de todos os estágios
